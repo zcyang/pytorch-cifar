@@ -18,6 +18,8 @@ from utils import progress_bar
 
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
+parser.add_argument('--output_dir', default="checkpoint", type=str, help='output dir')
+parser.add_argument('--model', default="resnet18", type=str, help='model name')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 args = parser.parse_args()
@@ -50,11 +52,14 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 
 # Model
 print('==> Building model..')
-# net = VGG('VGG19')
-net = ResNet18()
+if args.model == "vgg19":
+    net = VGG('VGG19')
+elif args.model == "resnet18":
+    net = ResNet18()
 # net = PreActResNet18()
 # net = GoogLeNet()
-# net = DenseNet121()
+elif args.model == "densenet121":
+    net = DenseNet121()
 # net = ResNeXt29_2x64d()
 # net = MobileNet()
 # net = MobileNetV2()
@@ -69,8 +74,8 @@ if device == 'cuda':
 if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
-    assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
-    checkpoint = torch.load('./checkpoint/ckpt.t7')
+    assert os.path.isdir(args.output_dir), 'Error: no checkpoint directory found!'
+    checkpoint = torch.load(os.path.join(args.output_dir, 'ckpt.t7'))
     net.load_state_dict(checkpoint['net'])
     best_acc = checkpoint['acc']
     start_epoch = checkpoint['epoch']
@@ -130,9 +135,9 @@ def test(epoch):
             'acc': acc,
             'epoch': epoch,
         }
-        if not os.path.isdir('checkpoint'):
-            os.mkdir('checkpoint')
-        torch.save(state, './checkpoint/ckpt.t7')
+        if not os.path.isdir(args.output_dir):
+            os.mkdir(args.output_dir)
+        torch.save(state, os.path.join(args.output_dir, 'ckpt.t7'))
         best_acc = acc
 
 
