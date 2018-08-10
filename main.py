@@ -57,6 +57,8 @@ if args.model == "vgg19":
     net = VGG('VGG19')
 elif args.model == "resnet18":
     net = ResNet18()
+elif args.model == "resnet50":
+    net = ResNet50()
 elif args.model == "resnet101":
     net = ResNet101()
 # net = PreActResNet18()
