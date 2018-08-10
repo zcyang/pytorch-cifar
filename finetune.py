@@ -80,7 +80,6 @@ def load_checkpoint():
     net.load_state_dict(checkpoint['net'])
     best_acc = checkpoint['acc']
     start_epoch = checkpoint['epoch']
-    print("checkpoint accuracy %.3f"%(best_acc))
     return net
 
 criterion = nn.CrossEntropyLoss()
