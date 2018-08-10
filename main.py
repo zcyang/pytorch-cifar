@@ -9,6 +9,7 @@ import torch.backends.cudnn as cudnn
 
 import torchvision
 import torchvision.transforms as transforms
+import torch.optim.lr_scheduler.MultiStepLR as MultiStepLR
 
 import os
 import argparse
@@ -82,6 +83,8 @@ if args.resume:
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
+scheduler = MultiStepLR(optimizer, milestones=[150, 250, 350], gamma=0.1)
+
 
 # Training
 def train(epoch):
@@ -129,6 +132,7 @@ def test(epoch):
     # Save checkpoint.
     acc = 100.*correct/total
     if acc > best_acc:
+        print('best_acc %.3f'%(best_acc))
         print('Saving..')
         state = {
             'net': net.state_dict(),
@@ -141,6 +145,9 @@ def test(epoch):
         best_acc = acc
 
 
-for epoch in range(start_epoch, start_epoch+200):
+for epoch in range(start_epoch, start_epoch+450):
+    scheduler.step()
+    for param_group in optimizer.param_groups:
+        print(param_group[‘lr’])
     train(epoch)
     test(epoch)
