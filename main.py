@@ -73,7 +73,6 @@ elif args.model == "densenet121":
 # net = SENet18()
 net = net.to(device)
 if device == 'cuda':
-    net = torch.nn.DataParallel(net)
     cudnn.benchmark = True
 
 if args.resume:

@@ -72,7 +72,6 @@ elif args.model == "densenet121":
 # net = SENet18()
 net = net.to(device)
 if device == 'cuda':
-    net = torch.nn.DataParallel(net)
     cudnn.benchmark = True
 
 def load_checkpoint():
@@ -101,6 +100,7 @@ def finetune():
         train_batch = trainset[top_k_indices]
         train_inputs, train_targets = train_batch
         train_inputs, train_targets = train_inputs.to("cuda"), train_targets.to("cuda")
+        net.train()
         for _ in range(args.num_steps):
           optimizer.zero_grad()
           train_outputs = net(train_inputs)

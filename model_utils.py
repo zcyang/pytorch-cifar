@@ -15,16 +15,17 @@ import torchvision.transforms as transforms
 def extract_feature(data, model, remove_top=True):
     model.eval()
     if remove_top:
-        model = nn.Sequential(*list(mode.children())[:-1])
+        model = nn.Sequential(*[l for l in model.children()][:-1])
 
     if isinstance(data, torch.Tensor):
         return model(inputs.to("cuda"))
-    elif isinstance(data, DataLoader):
+    elif isinstance(data, torch.utils.data.DataLoader):
         features = []
-        for batch_idx, (inputs, targets) in enumerate(dataloader):
+        for batch_idx, (inputs, targets) in enumerate(data):
             inputs = inputs.to("cuda")
-            features.append(model(inputs))
+            features.append(model(inputs).mean(-1).mean(-1).cpu().data)
 
+        import pdb; pdb.set_trace()
         return torch.cat(features, dim=0)
 
 
