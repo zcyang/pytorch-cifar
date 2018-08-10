@@ -9,13 +9,13 @@ import torch.backends.cudnn as cudnn
 
 import torchvision
 import torchvision.transforms as transforms
-import torch.optim.lr_scheduler.MultiStepLR as MultiStepLR
+import torch.optim.lr_scheduler as lr_scheduler 
 
 import os
 import argparse
 
 from models import *
-from utils import progress_bar
+# from utils import progress_bar
 
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
@@ -57,6 +57,8 @@ if args.model == "vgg19":
     net = VGG('VGG19')
 elif args.model == "resnet18":
     net = ResNet18()
+elif args.model == "resnet101":
+    net = ResNet101()
 # net = PreActResNet18()
 # net = GoogLeNet()
 elif args.model == "densenet121":
@@ -83,12 +85,11 @@ if args.resume:
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
-scheduler = MultiStepLR(optimizer, milestones=[150, 250, 350], gamma=0.1)
+scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[150, 250, 350], gamma=0.1)
 
 
 # Training
 def train(epoch):
-    print('\nEpoch: %d' % epoch)
     net.train()
     train_loss = 0
     correct = 0
@@ -106,8 +107,10 @@ def train(epoch):
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
 
-        progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-            % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
+
+        if batch_idx % 10 == 0:
+            print('Train Epoch: %d %d/%d Loss: %.3f | Acc: %.3f%% (%d/%d)'%(epoch, batch_idx, len(trainloader),
+                  train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
 def test(epoch):
     global best_acc
@@ -126,13 +129,17 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-                % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
+            if batch_idx % 10 == 0:
+                print('Test Epoch: %d %d/%d Loss: %.3f | Acc: %.3f%% (%d/%d)'%(epoch, batch_idx, len(testloader),
+                      test_loss/(batch_idx+1), 100.*correct/total, correct, total))
+
+            # progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+                # % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
     # Save checkpoint.
     acc = 100.*correct/total
     if acc > best_acc:
-        print('best_acc %.3f'%(best_acc))
+        print('best_acc %.3f'%(acc))
         print('Saving..')
         state = {
             'net': net.state_dict(),
@@ -148,6 +155,6 @@ def test(epoch):
 for epoch in range(start_epoch, start_epoch+450):
     scheduler.step()
     for param_group in optimizer.param_groups:
-        print(param_group[‘lr’])
+        print(param_group['lr'])
     train(epoch)
     test(epoch)
