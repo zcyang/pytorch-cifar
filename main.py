@@ -66,7 +66,8 @@ elif args.model == "resnet101":
 elif args.model == "densenet121":
     net = DenseNet121()
 # net = ResNeXt29_2x64d()
-# net = MobileNet()
+elif args.model =="mobilenet":
+    net = MobileNet()
 # net = MobileNetV2()
 # net = DPN92()
 # net = ShuffleNetG2()
